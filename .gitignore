@@ -1,0 +1,9 @@
+.vscode/
+venv/
+.env
+*.pbix
+__pycache__/              
+dagster_home/            
+data/* 
+*.pyc    
+*.db
