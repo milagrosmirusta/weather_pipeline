@@ -4,17 +4,17 @@ ETL pipeline completo para ingestión, transformación y carga de datos meteorol
 
 ## Tabla de Contenidos
 
-- [Descripción del Proyecto](#-descripción-del-proyecto)
-- [Arquitectura](#-arquitectura)
-- [Tecnologías Utilizadas](#-tecnologías-utilizadas)
-- [Modelo de Datos](#-modelo-de-datos)
-- [Requisitos Previos](#-requisitos-previos)
-- [Instalación y Configuración](#-instalación-y-configuración)
-- [Ejecución del Pipeline](#-ejecución-del-pipeline)
-- [Generación de Datos Históricos](#-generación-de-datos-históricos)
-- [Scheduling Automático](#-scheduling-automático)
-- [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Mejoras Futuras](#-mejoras-futuras)
+- [Descripción del Proyecto](#descripcion-del-proyecto)
+- [Arquitectura](#arquitectura)
+- [Tecnologías Utilizadas](#tecnologias-utilizadas)
+- [Modelo de Datos](#modelo-de-datos)
+- [Requisitos Previos](#requisitos-previos)
+- [Instalación y Configuración](#instalacion-y-configuracion)
+- [Ejecución del Pipeline](#ejecucion-del-pipeline)
+- [Generación de Datos Históricos](#generacion-de-datos-historicos)
+- [Scheduling Automático](#scheduling-automatico)
+- [Estructura del Proyecto](#estructura-del-proyecto)
+- [Mejoras Futuras](#mejoras-futuras)
 
 ---
 
@@ -96,7 +96,7 @@ Pipeline de datos end-to-end que:
 ### Esquema Estrella (Star Schema)
 ```sql
 ┌─────────────────────┐
-│  dim_conditions     │
+│     dim_conditions  │
 ├─────────────────────┤
 │ condition_id (PK)   │
 │ main                │
@@ -106,29 +106,35 @@ Pipeline de datos end-to-end que:
           │
           │ FK
           │
-┌─────────┴───────────────────────────┐
-│         fact_weather                │
-├─────────────────────────────────────┤
-│ id (PK)                             │
-│ city_id (FK) ─────────────┐         │
-│ condition_id (FK)         │         │
-│ date                      │         │
-│ temp                      │         │
-│ feels_like                │         │
-│ humidity                  │         │
-│ wind_speed                │         │
-│ created_at                │         │
-└───────────────────────────┼─────────┘
-                            │
-                            │ FK
-                            ▼
-                  ┌─────────────────┐
-                  │   dim_city      │
-                  ├─────────────────┤
-                  │ city_id (PK)    │
-                  │ city_name       │
-                  │ country         │
-                  └─────────────────┘
+┌─────────┴───────────────────────────────────────┐
+│                   fact_weather                  │
+├─────────────────────────────────────────────────┤
+│ id (PK)                                         │
+│ city_id (FK) ────────────────────────┐          │
+│ condition_id (FK)                    │          │
+│ date                                 │          │
+│ temp                                 │          │
+│ feels_like                           │          │
+│ humidity                             │          │
+│ wind_speed                           │          │
+│ wind_deg                             │          │
+│ pressure                             │          │
+│ visibility                           │          │
+│ created_at                           │          │
+└──────────────────────────────────────┼──────────┘
+                                       │
+                                       │ FK
+                                       ▼
+                  ┌──────────────────────────┐
+                  │         dim_city         │
+                  ├──────────────────────────┤
+                  │ city_id (PK)             │
+                  │ city_name                │
+                  │ country                  │
+                  │ latitude                 │
+                  │ longitude                │
+                  └──────────────────────────┘
+
 ```
 
 
@@ -198,6 +204,9 @@ DB_PASSWORD=weather123
 ### 5. Inicializar las tablas en PostgreSQL
 ```bash
 python sql/init_db.py
+python sql/migrate_add_columns.py
+
+(Esto fue por un error, lo correcto sería modificar init_db y agregar en create_tables.sql todas las columnas incluidas en add_columns.sql, pero como el proyecto ya estaba "productivo" lo solucioné de esta manera)
 ```
 
 ### 6. Configurar DAGSTER_HOME
@@ -300,15 +309,9 @@ dagster-daemon run
 weather_schedule = ScheduleDefinition(
     name="weather_hourly",
     job=weather_job,
-    cron_schedule="0 * * * *"  # Cada hora en punto
+    cron_schedule="0 * * * *"  
 )
 ```
-
-**Cron Expressions**:
-- `0 * * * *` → Cada hora
-- `0 */6 * * *` → Cada 6 horas
-- `0 9 * * *` → Diario a las 9 AM
-
 ---
 
 ## Estructura del Proyecto
