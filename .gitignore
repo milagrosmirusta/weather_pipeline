@@ -7,3 +7,4 @@ dagster_home/
 data/* 
 *.pyc    
 *.db
+*.png
