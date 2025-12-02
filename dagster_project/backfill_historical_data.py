@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import random
 from resources import WeatherAPIClient, DatabaseClient
 
-def generate_historical_data(days_back=60, cities=None):
+def generate_historical_data(days_back=7, cities=None):
     """
     Genera datos históricos de clima para los últimos N días
     
@@ -128,4 +128,4 @@ def generate_historical_data(days_back=60, cities=None):
 
 if __name__ == "__main__":
     # Generar 30 días de historia
-    generate_historical_data(days_back=30)
+    generate_historical_data(days_back=7)
